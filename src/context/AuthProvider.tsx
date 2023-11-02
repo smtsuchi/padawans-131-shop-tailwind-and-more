@@ -1,6 +1,7 @@
 import { GoogleAuthProvider, getAuth, signInWithPopup } from "firebase/auth";
 import { ReactNode, createContext, useState } from "react";
 import { IUser } from "../types/user";
+import toast from 'react-hot-toast';
 
 export interface IAuthContext {
     children: ReactNode;
@@ -40,6 +41,7 @@ export const AuthProvider = ({ children }: IAuthContext) => {
             uid: user.uid,
         };
         setUser(localUser);
+        toast.success(`Logged in! Welcome back ${localUser.displayName}~`)
         // TODO CREATE DATA CONTEXT
         // getCartFromDB(localUser);
         localStorage.setItem("shop_user", JSON.stringify(localUser));
@@ -50,6 +52,7 @@ export const AuthProvider = ({ children }: IAuthContext) => {
         localStorage.removeItem("shop_user");
         // TODO data context
         // setCart({});
+        toast.success('Logged out.')
     };
 
     const value = {

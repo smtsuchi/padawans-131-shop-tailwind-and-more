@@ -7,6 +7,7 @@ import { AuthContext } from "./context/AuthProvider";
 import { ICart } from "./types/cart";
 import { IProduct } from "./types/product";
 import { IUser } from "./types/user";
+import toast, { Toaster } from 'react-hot-toast';
 
 const STRIPE_KEY = import.meta.env.VITE_STRIPE_API_KEY;
 
@@ -14,6 +15,20 @@ export default function App() {
     const { user } = useContext(AuthContext)!;
     const [products, setProducts] = useState<IProduct[] | undefined>(undefined);
     const [cart, setCart] = useState<ICart>({});
+
+    useEffect(() => {
+        const query = new URLSearchParams(window.location.search);
+    
+        if (query.get("payment")=='success') {
+          toast.success("Order placed! You will receive an email confirmation.");
+          setCart({})
+          updateCartDB({})
+        }
+    
+        else if (query.get("payment")=='cancelled') {
+          toast.error("Order canceled -- continue to shop around and checkout when you're ready.");
+        }
+      }, []);
 
     const getProducts = async () => {
         const url = "https://api.stripe.com/v1/products";
@@ -52,6 +67,7 @@ export default function App() {
             copy[item.id] = { ...item, qty: 0 };
             copy[item.id].qty = 1;
         }
+        toast.success(`Added ${item.name} to your cart.`)
         setCart(copy);
         if (user) {
             updateCartDB(copy);
@@ -68,6 +84,8 @@ export default function App() {
 
     return (
         <div className="min-h-screen flex flex-col">
+            <Toaster />
+
             <WelcomeBar />
 
             <Shop products={products} addToCart={addToCart} />
